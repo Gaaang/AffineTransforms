@@ -14,9 +14,8 @@ namespace AffineTransformations
         public List<Edge> sides = new List<Edge>(); // стороны
         public float[] lighting;
         private Point3D[] point_normals;
-        public Polygon()
-        {
-        }
+
+        public Polygon() { }
 
         // redo for new members
         public Polygon(Polygon f)
@@ -30,14 +29,11 @@ namespace AffineTransformations
                 sides.Add(new Edge(s));
                 sides.Last().polygon = this;
             }
-            if (f.lighting != null)
-                lighting = f.lighting.ToArray();
         }
 
         ///  Calculate visibility of each side and lighting intensifyer of every visible vertex
         public void CalculateVisibiltyAndLighting(Point3D eye_pos)
         {
-            lighting = new float[points.Count];
             List<Edge>[] point_sides = new List<Edge>[points.Count];
             bool[] point_visible = new bool[points.Count];
             point_normals = new Point3D[points.Count];
@@ -67,55 +63,12 @@ namespace AffineTransformations
             }
         }
 
-        private void CalculateVertexNormals()
-        {
-            point_normals = new Point3D[points.Count];
-            int[] count_sidesPerPoint = new int[points.Count];
-            for (int i = 0; i < points.Count; i++)
-            {
-                point_normals[i] = new Point3D(0, 0, 0);
-                count_sidesPerPoint[i] = 0;
-
-            }
-
-            foreach (Edge s in sides)
-            {
-                s.CalculateSideNormal();
-                // sorry in this project normals are calculated inverted pls fix
-                Point3D Normal = new Point3D(s.Normal.X * -1, s.Normal.Y * -1, s.Normal.Z * -1);
-                for (int i = 0; i < s.points.Count; i++)
-                {
-                    int ind = s.points[i];
-                    point_normals[ind].X += Normal.X;
-                    point_normals[ind].Y += Normal.Y;
-                    point_normals[ind].Z += Normal.Z;
-                    count_sidesPerPoint[ind] += 1;
-
-                }
-
-
-            }
-            for (int i = 0; i < points.Count; i++)
-            {
-                if (count_sidesPerPoint[i] != 0)
-                {
-                    point_normals[i].X /= count_sidesPerPoint[i];
-                    point_normals[i].Y /= count_sidesPerPoint[i];
-                    point_normals[i].Z /= count_sidesPerPoint[i];
-                    point_normals[i] = Point3D.Norm(point_normals[i]);
-                }
-            }
-
-
-        }
-
-
         ///
         /// ----------------------------- TRANSFORMS  SUPPORT METHODS --------------------------------
         ///
 
 
-        public float[,] get_matrix()
+        public float[,] GetMatrix()
         {
             var res = new float[points.Count, 4];
             for (int i = 0; i < points.Count; i++)
@@ -127,7 +80,8 @@ namespace AffineTransformations
             }
             return res;
         }
-        public void apply_matrix(float[,] matrix)
+
+        public void ApplyMatrix(float[,] matrix)
         {
             for (int i = 0; i < points.Count; i++)
             {
@@ -137,7 +91,9 @@ namespace AffineTransformations
 
             }
         }
-        private Point3D get_center()
+
+        //определяет центр
+        private Point3D GetCenter()
         {
             Point3D res = new Point3D(0, 0, 0);
             foreach (Point3D p in points)
@@ -158,62 +114,60 @@ namespace AffineTransformations
         /// ----------------------------- APHINE TRANSFORMS METHODS --------------------------------
         ///
 
-        public void rotate_around_rad(float rangle, string type)
+        //
+        public void RotateAround(float angle, string type)
         {
-            float[,] mt = get_matrix();
-            Point3D center = get_center();
+            RotateAroundRad(angle * (float)Math.PI / 180, type);
+        }
+
+        public void RotateAroundRad(float rangle, string type)
+        {
+            float[,] mt = GetMatrix();
+            Point3D center = GetCenter();
             switch (type)
             {
                 case "CX":
-                    mt = apply_offset(mt, -center.X, -center.Y, -center.Z);
-                    mt = apply_rotation_X(mt, rangle);
-                    mt = apply_offset(mt, center.X, -center.Y, -center.Z);
+                    mt = ApplyOffset(mt, -center.X, -center.Y, -center.Z);
+                    mt = ApplyRotationX(mt, rangle);
+                    mt = ApplyOffset(mt, center.X, -center.Y, -center.Z);
                     break;
                 case "CY":
-                    mt = apply_offset(mt, -center.X, -center.Y, -center.Z);
-                    mt = apply_rotation_Y(mt, rangle);
-                    mt = apply_offset(mt, center.X, -center.Y, -center.Z);
+                    mt = ApplyOffset(mt, -center.X, -center.Y, -center.Z);
+                    mt = ApplyRotationY(mt, rangle);
+                    mt = ApplyOffset(mt, center.X, -center.Y, -center.Z);
                     break;
                 case "CZ":
-                    mt = apply_offset(mt, -center.X, -center.Y, -center.Z);
-                    mt = apply_rotation_Z(mt, rangle);
-                    mt = apply_offset(mt, center.X, -center.Y, -center.Z);
+                    mt = ApplyOffset(mt, -center.X, -center.Y, -center.Z);
+                    mt = ApplyRotationZ(mt, rangle);
+                    mt = ApplyOffset(mt, center.X, -center.Y, -center.Z);
                     break;
                 case "X":
-                    mt = apply_rotation_X(mt, rangle);
+                    mt = ApplyRotationX(mt, rangle);
                     break;
                 case "Y":
-                    mt = apply_rotation_Y(mt, rangle);
+                    mt = ApplyRotationY(mt, rangle);
                     break;
                 case "Z":
-                    mt = apply_rotation_Z(mt, rangle);
+                    mt = ApplyRotationZ(mt, rangle);
                     break;
                 default:
                     break;
             }
-            apply_matrix(mt);
+            ApplyMatrix(mt);
         }
-        public void rotate_around(float angle, string type)
+
+        public void ScaleAxis(float xs, float ys, float zs)
         {
-            rotate_around_rad(angle * (float)Math.PI / 180, type);
-        }
-        public void scale_axis(float xs, float ys, float zs)
-        {
-            float[,] pnts = get_matrix();
+            float[,] pnts = GetMatrix();
             pnts = apply_scale(pnts, xs, ys, zs);
-            apply_matrix(pnts);
-        }
-        public void offset(float xs, float ys, float zs)
-        {
-            apply_matrix(apply_offset(get_matrix(), xs, ys, zs));
+            ApplyMatrix(pnts);
         }
 
-        public void SetPen(Pen dw)
+        public void Offset(float xs, float ys, float zs)
         {
-            foreach (Edge s in sides)
-                s.penEdge = dw;
-
+            ApplyMatrix(ApplyOffset(GetMatrix(), xs, ys, zs));
         }
+
         //определяет цвет граней
         public void SetRandColor()
         {
@@ -225,32 +179,33 @@ namespace AffineTransformations
             }
         }
 
-
-        public void scale_around_center(float xs, float ys, float zs)
+        public void ScaleAroundCenter(float xs, float ys, float zs)
         {
-            float[,] pnts = get_matrix();
-            Point3D p = get_center();
-            pnts = apply_offset(pnts, -p.X, -p.Y, -p.Z);
+            float[,] pnts = GetMatrix();
+            Point3D p = GetCenter();
+            pnts = ApplyOffset(pnts, -p.X, -p.Y, -p.Z);
             pnts = apply_scale(pnts, xs, ys, zs);
-            pnts = apply_offset(pnts, p.X, p.Y, p.Z);
-            apply_matrix(pnts);
+            pnts = ApplyOffset(pnts, p.X, p.Y, p.Z);
+            ApplyMatrix(pnts);
         }
-        public void line_rotate_rad(float rang, Point3D p1, Point3D p2)
+
+        /// rotate figure line
+        public void LineRotation(float ang, Point3D p1, Point3D p2)
+        {
+            ang = ang * (float)Math.PI / 180;
+            LineRotarionRad(ang, p1, p2);
+        }
+
+        public void LineRotarionRad(float rang, Point3D p1, Point3D p2)
         {
 
             p2 = new Point3D(p2.X - p1.X, p2.Y - p1.Y, p2.Z - p1.Z);
             p2 = Point3D.Norm(p2);
 
-            float[,] mt = get_matrix();
-            apply_matrix(rotate_around_line(mt, p1, p2, rang));
+            float[,] mt = GetMatrix();
+            ApplyMatrix(rotate_around_line(mt, p1, p2, rang));
         }
 
-        /// rotate figure line
-        public void line_rotate(float ang, Point3D p1, Point3D p2)
-        {
-            ang = ang * (float)Math.PI / 180;
-            line_rotate_rad(ang, p1, p2);
-        }
 
         ///
         /// ----------------------------- PROJECTIONS METHODS --------------------------------
@@ -258,23 +213,23 @@ namespace AffineTransformations
 
         public void project_orthogX()
         {
-            apply_matrix(orthographic_projection_X(get_matrix()));
+            ApplyMatrix(orthographic_projection_X(GetMatrix()));
         }
         public void project_orthogY()
         {
-            apply_matrix(orthographic_projection_Y(get_matrix()));
+            ApplyMatrix(orthographic_projection_Y(GetMatrix()));
         }
         public void project_orthogZ()
         {
-            apply_matrix(orthographic_projection_Z(get_matrix()));
+            ApplyMatrix(orthographic_projection_Z(GetMatrix()));
         }
         public void project_isometric()
         {
-            apply_matrix(isometric_projection(get_matrix()));
+            ApplyMatrix(isometric_projection(GetMatrix()));
         }
         public void project_cental()
         {
-            apply_matrix(perspective_projection(get_matrix()));
+            ApplyMatrix(perspective_projection(GetMatrix()));
         }
 
 
@@ -296,8 +251,9 @@ namespace AffineTransformations
             float val21 = dir.Y * (1 - cos_angle) * dir.Z - dir.X * sin_angle;
             float val22 = dir.Z * dir.Z + cos_angle * (1 - dir.Z * dir.Z);
             float[,] rotateMatrix = new float[,] { { val00, val01, val02, 0 }, { val10, val11, val12, 0 }, { val20, val21, val22, 0 }, { 0, 0, 0, 1 } };
-            return apply_offset(multiply_matrix(apply_offset(transform_matrix, -start.X, -start.Y, -start.Z), rotateMatrix), start.X, start.Y, start.Z);
+            return ApplyOffset(multiply_matrix(ApplyOffset(transform_matrix, -start.X, -start.Y, -start.Z), rotateMatrix), start.X, start.Y, start.Z);
         }
+
         private static float[,] multiply_matrix(float[,] m1, float[,] m2)
         {
             float[,] res = new float[m1.GetLength(0), m2.GetLength(1)];
@@ -314,34 +270,40 @@ namespace AffineTransformations
             return res;
 
         }
-        private static float[,] apply_offset(float[,] transform_matrix, float offset_x, float offset_y, float offset_z)
+
+        private static float[,] ApplyOffset(float[,] transform_matrix, float offset_x, float offset_y, float offset_z)
         {
             float[,] translationMatrix = new float[,] { { 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { offset_x, offset_y, offset_z, 1 } };
             return multiply_matrix(transform_matrix, translationMatrix);
         }
-        private static float[,] apply_rotation_X(float[,] transform_matrix, float angle)
+
+        private static float[,] ApplyRotationX(float[,] transform_matrix, float angle)
         {
             float[,] rotationMatrix = new float[,] { { 1, 0, 0, 0 }, { 0, (float)Math.Cos(angle), (float)Math.Sin(angle), 0 },
                 { 0, -(float)Math.Sin(angle), (float)Math.Cos(angle), 0}, { 0, 0, 0, 1} };
             return multiply_matrix(transform_matrix, rotationMatrix);
         }
-        private static float[,] apply_rotation_Y(float[,] transform_matrix, float angle)
+
+        private static float[,] ApplyRotationY(float[,] transform_matrix, float angle)
         {
             float[,] rotationMatrix = new float[,] { { (float)Math.Cos(angle), 0, -(float)Math.Sin(angle), 0 }, { 0, 1, 0, 0 },
                 { (float)Math.Sin(angle), 0, (float)Math.Cos(angle), 0}, { 0, 0, 0, 1} };
             return multiply_matrix(transform_matrix, rotationMatrix);
         }
-        private static float[,] apply_rotation_Z(float[,] transform_matrix, float angle)
+
+        private static float[,] ApplyRotationZ(float[,] transform_matrix, float angle)
         {
             float[,] rotationMatrix = new float[,] { { (float)Math.Cos(angle), (float)Math.Sin(angle), 0, 0 }, { -(float)Math.Sin(angle), (float)Math.Cos(angle), 0, 0 },
                 { 0, 0, 1, 0 }, { 0, 0, 0, 1} };
             return multiply_matrix(transform_matrix, rotationMatrix);
         }
+
         private static float[,] apply_scale(float[,] transform_matrix, float scale_x, float scale_y, float scale_z)
         {
             float[,] scaleMatrix = new float[,] { { scale_x, 0, 0, 0 }, { 0, scale_y, 0, 0 }, { 0, 0, scale_z, 0 }, { 0, 0, 0, 1 } };
             return multiply_matrix(transform_matrix, scaleMatrix);
         }
+
         private static float[,] perspective_projection(float[,] transform_matrix)
         {
             float center = 200;
@@ -396,6 +358,7 @@ namespace AffineTransformations
         /// ------------------------STATIC READY FIGURES-----------------------------
         ///
 
+        //for camera
         static public Polygon getCoordinates()
         {
             Polygon res = new Polygon();
@@ -466,7 +429,7 @@ namespace AffineTransformations
             return res;
         }
 
-        static public Polygon get_Tetrahedron(float sz)
+        static public Polygon Tetrahedron(float sz)
         {
             Polygon res = new Polygon();
             sz = sz / 2;
@@ -486,7 +449,7 @@ namespace AffineTransformations
             return res;
         }
 
-        static public Polygon get_Icosahedron(float sz)
+        static public Polygon Icosahedron(float sz)
         {
             Polygon res = new Polygon();
             float ang = (float)(Math.PI / 5);
@@ -508,12 +471,10 @@ namespace AffineTransformations
                 if (i % 2 == 0)
                 {
                     s.points.AddRange(new int[] { i, (i + 1) % ind, (i + 2) % ind });
-                    //  s.drawing_pen = new Pen(Color.Green);
                 }
                 else
                 {
                     s.points.AddRange(new int[] { (i + 2) % ind, (i + 1) % ind, i });
-                    //   s.drawing_pen = new Pen(Color.Red);
                 }
 
                 res.sides.Add(s);
@@ -538,40 +499,9 @@ namespace AffineTransformations
                 res.sides.Add(s);
             }
 
-            res.scale_around_center(sz, sz, sz);
+            res.ScaleAroundCenter(sz, sz, sz);
 
             res.SetRandColor();
-            return res;
-        }
-
-        public static Polygon get_Rotation(List<Point3D> pnts, Point3D axis1, Point3D axis2, int divs)
-        {
-            Polygon res = new Polygon();
-            Polygon edge = new Polygon();
-            int cnt_pnt = pnts.Count;
-            edge.points = pnts.Select(x => new Point3D(x)).ToList();
-            res.points = pnts.Select(x => new Point3D(x)).ToList();
-            int cur_ind = res.points.Count;
-            float ang = (float)360 / divs;
-            for (int i = 0; i < divs; i++)
-            {
-                edge.line_rotate(ang, axis1, axis2);
-                cur_ind = res.points.Count;
-                for (int j = 0; j < cnt_pnt; j++)
-                {
-                    res.points.Add(new Point3D(edge.points[j]));
-
-                }
-
-                for (int j = cur_ind; j < res.points.Count - 1; j++)
-                {
-                    Edge s = new Edge(res);
-                    s.points.AddRange(new int[] { j, j + 1, j + 1 - cnt_pnt, j - cnt_pnt });
-                    res.sides.Add(s);
-
-                }
-            }
-            res.SetPen(new Pen(Color.Black));
             return res;
         }
     }

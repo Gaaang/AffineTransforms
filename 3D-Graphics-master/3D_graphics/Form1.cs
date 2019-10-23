@@ -12,21 +12,14 @@ namespace AffineTransformations
 
         public List<Polygon> scene = new List<Polygon>();
         public OrbitCamera OrbitCam = new OrbitCamera(200, 0, (float)Math.PI / 2, 0, new Point3D(0, 0, 0), (float)(65 * Math.PI / 180), (float)(65 * Math.PI / 180), 100, 300);
-        public Color[,] texture;
 
         public Form1()
         {
             InitializeComponent();
             Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            using (Graphics graph = Graphics.FromImage(bmp))
-            {
-                Rectangle ImageSize = new Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height);
-                graph.FillRectangle(Brushes.White, ImageSize);
-            }
             pictureBox1.Image = bmp;
             comboBox2.SelectedIndex = 0;
             ControlType.SelectedIndex = 0;
-            texture = new Color[1, 1] { { Color.Black } };
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -42,25 +35,25 @@ namespace AffineTransformations
             switch (type)
             {
                 case "CenterX":
-                    f.rotate_around(ang, "CX");
+                    f.RotateAround(ang, "CX");
                     break;
                 case "CenterY":
-                    f.rotate_around(ang, "CY");
+                    f.RotateAround(ang, "CY");
                     break;
                 case "CenterZ":
-                    f.rotate_around(ang, "CZ");
+                    f.RotateAround(ang, "CZ");
                     break;
                 case "X axis":
-                    f.rotate_around(ang, "X");
+                    f.RotateAround(ang, "X");
                     break;
                 case "Y axis":
-                    f.rotate_around(ang, "Y");
+                    f.RotateAround(ang, "Y");
                     break;
                 case "Z asix":
-                    f.rotate_around(ang, "Z");
+                    f.RotateAround(ang, "Z");
                     break;
                 case "Custom Line":
-                    f.line_rotate(ang, new Point3D((float)ControlCustom1X.Value, (float)ControlCustom1Y.Value, (float)ControlCustom1Z.Value),
+                    f.LineRotation(ang, new Point3D((float)ControlCustom1X.Value, (float)ControlCustom1Y.Value, (float)ControlCustom1Z.Value),
                                         new Point3D((float)ControlCustom2X.Value, (float)ControlCustom2Y.Value, (float)ControlCustom2Z.Value));
                     break;
                 default:
@@ -83,7 +76,7 @@ namespace AffineTransformations
 
             RotatePolygon(f, an, ControlType.Text);
             ScalePolygon(f, sx, sy, sz, ControlType.Text);
-            f.offset(ox, oy, oz);
+            f.Offset(ox, oy, oz);
         }
 
         private void ScalePolygon(Polygon f, float sx, float sy, float sz, string type)
@@ -93,12 +86,12 @@ namespace AffineTransformations
                 case "CenterX":
                 case "CenterY":
                 case "CenterZ":
-                    f.scale_around_center(sx, sy, sz);
+                    f.ScaleAroundCenter(sx, sy, sz);
                     break;
                 case "X axis":
                 case "Y axis":
                 case "Z asix":
-                    f.scale_axis(sx, sy, sz);
+                    f.ScaleAxis(sx, sy, sz);
                     break;
                 default:
                     break;
@@ -128,13 +121,13 @@ namespace AffineTransformations
             switch (comboBox2.Text)
             {
                 case "Tetrahedron":
-                    scene.Add(Polygon.get_Tetrahedron(100));//тетраэдр
+                    scene.Add(Polygon.Tetrahedron(100));//тетраэдр
                     break;
                 case "Octahedron":
                     scene.Add(Polygon.Octahedron(100));//октаэдр
                     break;
                 case "Icosahedron":
-                    scene.Add(Polygon.get_Icosahedron(50));//икосаэдр
+                    scene.Add(Polygon.Icosahedron(50));//икосаэдр
                     break;
                 default:
                     break;

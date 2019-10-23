@@ -24,7 +24,6 @@ namespace AffineTransformations
         private float[,] complete_matrix_perspective;
         private float[,] complete_matrix_orthoganal;
         private bool isorthg = false;
-        public bool istexture = false;
 
         /// Basic Camera object
         public CameraView(Point3D p, Point3D t, Point3D u, float fvx, float fvy, float mind, float maxd)
@@ -96,7 +95,7 @@ namespace AffineTransformations
                 else
                 {
 
-                    f.apply_matrix(multiply_matrix(multiply_matrix(f.get_matrix(), view_matrix), perspective_projection_matrix));
+                    f.ApplyMatrix(multiply_matrix(multiply_matrix(f.GetMatrix(), view_matrix), perspective_projection_matrix));
                 }
 
 
@@ -666,10 +665,10 @@ namespace AffineTransformations
             for (int i = 1; i < 4; i++)
                 cam.points[i] = Point3D.Norm(cam.points[i]);
 
-            cam.offset(-cam_distance, 0, 0);
-            cam.line_rotate_rad(cam_angx, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
-            cam.line_rotate_rad(cam_angy, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
-            cam.line_rotate_rad(cam_tilt, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
+            cam.Offset(-cam_distance, 0, 0);
+            cam.LineRotarionRad(cam_angx, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
+            cam.LineRotarionRad(cam_angy, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
+            cam.LineRotarionRad(cam_tilt, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
 
             set_cam();
         }
@@ -682,7 +681,7 @@ namespace AffineTransformations
 
         public void MoveUpDown(float rad_ang)
         {
-            cam.line_rotate_rad(rad_ang, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
+            cam.LineRotarionRad(rad_ang, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
             angY += rad_ang;
             set_cam();
             if (angY >= Math.PI * 2) angY -= (float)Math.PI * 2;
@@ -691,7 +690,7 @@ namespace AffineTransformations
 
         public void MoveLeftRight(float rad_ang)
         {
-            cam.line_rotate_rad(rad_ang, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
+            cam.LineRotarionRad(rad_ang, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
             angX += rad_ang;
             set_cam();
             if (angX >= Math.PI * 2) angX -= (float)Math.PI * 2;
@@ -700,7 +699,7 @@ namespace AffineTransformations
 
         public void TiltLeftRight(float rad_ang)
         {
-            cam.line_rotate_rad(rad_ang, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
+            cam.LineRotarionRad(rad_ang, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
             angT += rad_ang;
             set_cam();
             if (angT >= Math.PI * 2) angT -= (float)Math.PI * 2;
@@ -710,7 +709,7 @@ namespace AffineTransformations
         public void MoveFarNear(float d)
         {
             Point3D ofst = cam.points[0] - cam.points[2];
-            cam.offset(d * ofst.X, d * ofst.Y, d * ofst.Z);
+            cam.Offset(d * ofst.X, d * ofst.Y, d * ofst.Z);
             dist += d;
             set_cam();
         }
@@ -751,10 +750,10 @@ namespace AffineTransformations
             for (int i = 1; i < 4; i++)
                 cam.points[i] = Point3D.Norm(cam.points[i]);
 
-            cam.offset(-cam_distance, 0, 0);
-            cam.line_rotate_rad(cam_angx, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
-            cam.line_rotate_rad(cam_angy, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
-            cam.line_rotate_rad(cam_tilt, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
+            cam.Offset(-cam_distance, 0, 0);
+            cam.LineRotarionRad(cam_angx, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
+            cam.LineRotarionRad(cam_angy, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
+            cam.LineRotarionRad(cam_tilt, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
 
             set_cam();
         }
