@@ -61,11 +61,11 @@ namespace AffineTransformations
 
         public Bitmap CameraRender(PictureBox rend_obj, List<Polygon> scene)
         {
-            point3 ViewPortTranform(Point3D p, float l)
+            point3 ViewPortTranform(Point3D p)
             {
                 return new point3((int)((1 + p.X) * rend_obj.Width / 2),
                                   (int)((1 + p.Y) * rend_obj.Height / 2),
-                                  (int)(1 / p.Z * 100000000), l);
+                                  (int)(1 / p.Z * 100000000));
             }
 
             List<Polygon> view = scene.Select(f => new Polygon(f)).ToList();
@@ -109,7 +109,7 @@ namespace AffineTransformations
                     switch (s.points.Count)
                     {
                         case 1://рисуем
-                            point3 p0 = ViewPortTranform(s.getPoint(0), f.lighting[s.points[0]]);
+                            point3 p0 = ViewPortTranform(s.getPoint(0));
                             if (p0.z > zbuffer[p0.y, p0.x])
                             {
                                 zbuffer[p0.y, p0.x] = p0.z;
@@ -117,17 +117,17 @@ namespace AffineTransformations
                             }
                             break;
                         case 2:
-                            pl = s.points.Select(i => ViewPortTranform(s.polygon.points[i], s.polygon.lighting[i])).OrderBy(p => p.y).ToArray();
+                            pl = s.points.Select(i => ViewPortTranform(s.polygon.points[i])).OrderBy(p => p.y).ToArray();
                             FillTrinagle(pl[0], pl[1], pl[1], w, h, zbuffer, cbuffer, ObjectTexture);
                             break;
 
                         case 3:
-                            pl = s.points.Select(i => ViewPortTranform(s.polygon.points[i], s.polygon.lighting[i])).OrderBy(p => p.y).ToArray();
+                            pl = s.points.Select(i => ViewPortTranform(s.polygon.points[i])).OrderBy(p => p.y).ToArray();
                             FillTrinagle(pl[0], pl[1], pl[2], w, h, zbuffer, cbuffer, ObjectTexture);
                             break;
                         default:
                         case 4:
-                            pl = s.points.Select(i => ViewPortTranform(s.polygon.points[i], s.polygon.lighting[i])).ToArray();
+                            pl = s.points.Select(i => ViewPortTranform(s.polygon.points[i])).ToArray();
                             FillQuad(pl, w, h, zbuffer, cbuffer, ObjectTexture);
                             break;
                     }
@@ -312,15 +312,11 @@ namespace AffineTransformations
 
         }
 
-        private static float[] FInterpolate(int i0, float d0, int i1, float d1)
+        private static float[] FInterpolate(int i0,  int i1)
         {
-            if (i0 == i1)
-            {
-                return new float[] { d0 };
-            }
             float[] res;
-            float a = (d1 - d0) / (i1 - i0);
-            float val = d0;
+            float a =  (i1 - i0);
+            float val = 0;
             res = new float[i1 - i0 + 1];
             int ind = 0;
             for (int i = i0; i <= i1; i++)
@@ -388,13 +384,13 @@ namespace AffineTransformations
 
             int[] xWayCW = Interpolate(pl[wayCW[0]].y, pl[wayCW[0]].x, pl[wayCW[1]].y, pl[wayCW[1]].x);
             int[] hWayCW = Interpolate(pl[wayCW[0]].y, pl[wayCW[0]].z, pl[wayCW[1]].y, pl[wayCW[1]].z);
-            float[] fWayCW = FInterpolate(pl[wayCW[0]].y, pl[wayCW[0]].l, pl[wayCW[1]].y, pl[wayCW[1]].l);
+            float[] fWayCW = FInterpolate(pl[wayCW[0]].y, pl[wayCW[1]].y);
             for (int k = 1; k < wayCW.Count - 1; k++)
             {
 
                 xWayCW = xWayCW.Take(xWayCW.Count() - 1).Concat(Interpolate(pl[wayCW[k]].y, pl[wayCW[k]].x, pl[wayCW[k + 1]].y, pl[wayCW[k + 1]].x)).ToArray();
                 hWayCW = hWayCW.Take(hWayCW.Count() - 1).Concat(Interpolate(pl[wayCW[k]].y, pl[wayCW[k]].z, pl[wayCW[k + 1]].y, pl[wayCW[k + 1]].z)).ToArray();
-                fWayCW = fWayCW.Take(fWayCW.Count() - 1).Concat(FInterpolate(pl[wayCW[k]].y, pl[wayCW[k]].l, pl[wayCW[k + 1]].y, pl[wayCW[k + 1]].l)).ToArray();
+                fWayCW = fWayCW.Take(fWayCW.Count() - 1).Concat(FInterpolate(pl[wayCW[k]].y, pl[wayCW[k + 1]].y)).ToArray();
 
             }
 
@@ -405,12 +401,12 @@ namespace AffineTransformations
 
             int[] xWayCCW = Interpolate(pl[wayCCW[0]].y, pl[wayCCW[0]].x, pl[wayCCW[1]].y, pl[wayCCW[1]].x);
             int[] hWayCCW = Interpolate(pl[wayCCW[0]].y, pl[wayCCW[0]].z, pl[wayCCW[1]].y, pl[wayCCW[1]].z);
-            float[] fWayCCW = FInterpolate(pl[wayCCW[0]].y, pl[wayCCW[0]].l, pl[wayCCW[1]].y, pl[wayCCW[1]].l);
+            float[] fWayCCW = FInterpolate(pl[wayCCW[0]].y, pl[wayCCW[1]].y);
             for (int k = 1; k < wayCCW.Count - 1; k++)
             {
                 xWayCCW = xWayCCW.Take(xWayCCW.Count() - 1).Concat(Interpolate(pl[wayCCW[k]].y, pl[wayCCW[k]].x, pl[wayCCW[k + 1]].y, pl[wayCCW[k + 1]].x)).ToArray();
                 hWayCCW = hWayCCW.Take(hWayCCW.Count() - 1).Concat(Interpolate(pl[wayCCW[k]].y, pl[wayCCW[k]].z, pl[wayCCW[k + 1]].y, pl[wayCCW[k + 1]].z)).ToArray();
-                fWayCCW = fWayCCW.Take(fWayCCW.Count() - 1).Concat(FInterpolate(pl[wayCCW[k]].y, pl[wayCCW[k]].l, pl[wayCCW[k + 1]].y, pl[wayCCW[k + 1]].l)).ToArray();
+                fWayCCW = fWayCCW.Take(fWayCCW.Count() - 1).Concat(FInterpolate(pl[wayCCW[k]].y, pl[wayCCW[k + 1]].y)).ToArray();
             }
 
 
@@ -459,7 +455,7 @@ namespace AffineTransformations
                 }
 
                 int[] h_segment = Interpolate(x_l, hleft[i], x_r, hright[i]);
-                float[] f_segment = FInterpolate(x_l, fleft[i], x_r, fright[i]);
+                float[] f_segment = FInterpolate(x_l, x_r);
 
                 for (int x = lx; x <= ux; x++)
                 {
@@ -526,12 +522,12 @@ namespace AffineTransformations
             int[] h012 = Interpolate(p0.y, p0.z, p1.y, p1.z);
             h012 = h012.Take(h012.Length - 1).Concat(Interpolate(p1.y, p1.z, p2.y, p2.z)).ToArray();
 
-            float[] f012 = FInterpolate(p0.y, p0.l, p1.y, p1.l);
-            f012 = f012.Take(f012.Length - 1).Concat(FInterpolate(p1.y, p1.l, p2.y, p2.l)).ToArray();
+            float[] f012 = FInterpolate(p0.y, p1.y);
+            f012 = f012.Take(f012.Length - 1).Concat(FInterpolate(p1.y, p2.y)).ToArray();
 
             int[] x02 = Interpolate(p0.y, p0.x, p2.y, p2.x);
             int[] h02 = Interpolate(p0.y, p0.z, p2.y, p2.z);
-            float[] f02 = FInterpolate(p0.y, p0.l, p2.y, p2.l);
+            float[] f02 = FInterpolate(p0.y, p2.y);
 
 
 
@@ -583,7 +579,7 @@ namespace AffineTransformations
                 if (x_l > x_r)
                     break;
                 h_segment = Interpolate(x_l, h_left[i], x_r, h_right[i]);
-                f_segment = FInterpolate(x_l, f_left[i], x_r, f_right[i]);
+                f_segment = FInterpolate(x_l, x_r);
 
 
                 for (int x = lx; x <= ux; x++)
@@ -665,10 +661,10 @@ namespace AffineTransformations
             for (int i = 1; i < 4; i++)
                 cam.points[i] = Point3D.Norm(cam.points[i]);
 
-            cam.Offset(-cam_distance, 0, 0);
-            cam.LineRotarionRad(cam_angx, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
-            cam.LineRotarionRad(cam_angy, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
-            cam.LineRotarionRad(cam_tilt, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
+            cam.offset(-cam_distance, 0, 0);
+            cam.line_rotate_rad(cam_angx, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
+            cam.line_rotate_rad(cam_angy, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
+            cam.line_rotate_rad(cam_tilt, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
 
             set_cam();
         }
@@ -681,7 +677,7 @@ namespace AffineTransformations
 
         public void MoveUpDown(float rad_ang)
         {
-            cam.LineRotarionRad(rad_ang, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
+            cam.line_rotate_rad(rad_ang, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
             angY += rad_ang;
             set_cam();
             if (angY >= Math.PI * 2) angY -= (float)Math.PI * 2;
@@ -690,7 +686,7 @@ namespace AffineTransformations
 
         public void MoveLeftRight(float rad_ang)
         {
-            cam.LineRotarionRad(rad_ang, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
+            cam.line_rotate_rad(rad_ang, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
             angX += rad_ang;
             set_cam();
             if (angX >= Math.PI * 2) angX -= (float)Math.PI * 2;
@@ -699,7 +695,7 @@ namespace AffineTransformations
 
         public void TiltLeftRight(float rad_ang)
         {
-            cam.LineRotarionRad(rad_ang, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
+            cam.line_rotate_rad(rad_ang, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
             angT += rad_ang;
             set_cam();
             if (angT >= Math.PI * 2) angT -= (float)Math.PI * 2;
@@ -709,7 +705,7 @@ namespace AffineTransformations
         public void MoveFarNear(float d)
         {
             Point3D ofst = cam.points[0] - cam.points[2];
-            cam.Offset(d * ofst.X, d * ofst.Y, d * ofst.Z);
+            cam.offset(d * ofst.X, d * ofst.Y, d * ofst.Z);
             dist += d;
             set_cam();
         }
@@ -750,10 +746,10 @@ namespace AffineTransformations
             for (int i = 1; i < 4; i++)
                 cam.points[i] = Point3D.Norm(cam.points[i]);
 
-            cam.Offset(-cam_distance, 0, 0);
-            cam.LineRotarionRad(cam_angx, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
-            cam.LineRotarionRad(cam_angy, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
-            cam.LineRotarionRad(cam_tilt, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
+            cam.offset(-cam_distance, 0, 0);
+            cam.line_rotate_rad(cam_angx, new Point3D(0, 0, 0), cam.points[3] - cam.points[0]);
+            cam.line_rotate_rad(cam_angy, new Point3D(0, 0, 0), cam.points[1] - cam.points[0]);
+            cam.line_rotate_rad(cam_tilt, new Point3D(0, 0, 0), cam.points[2] - cam.points[0]);
 
             set_cam();
         }
@@ -764,15 +760,13 @@ namespace AffineTransformations
         public int x;
         public int y;
         public int z;
-        public float l;
 
 
-        public point3(int _x, int _y, int _z, float _l)
+        public point3(int _x, int _y, int _z)
         {
             x = _x;
             y = _y;
             z = _z;
-            l = _l;
         }
     }
 }

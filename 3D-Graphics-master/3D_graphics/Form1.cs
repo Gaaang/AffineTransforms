@@ -53,7 +53,7 @@ namespace AffineTransformations
                     f.RotateAround(ang, "Z");
                     break;
                 case "Custom Line":
-                    f.LineRotation(ang, new Point3D((float)ControlCustom1X.Value, (float)ControlCustom1Y.Value, (float)ControlCustom1Z.Value),
+                    f.line_rotate(ang, new Point3D((float)ControlCustom1X.Value, (float)ControlCustom1Y.Value, (float)ControlCustom1Z.Value),
                                         new Point3D((float)ControlCustom2X.Value, (float)ControlCustom2Y.Value, (float)ControlCustom2Z.Value));
                     break;
                 default:
@@ -76,7 +76,7 @@ namespace AffineTransformations
 
             RotatePolygon(f, an, ControlType.Text);
             ScalePolygon(f, sx, sy, sz, ControlType.Text);
-            f.Offset(ox, oy, oz);
+            f.offset(ox, oy, oz);
         }
 
         private void ScalePolygon(Polygon f, float sx, float sy, float sz, string type)
@@ -86,12 +86,12 @@ namespace AffineTransformations
                 case "CenterX":
                 case "CenterY":
                 case "CenterZ":
-                    f.ScaleAroundCenter(sx, sy, sz);
+                    f.scale_around_center(sx, sy, sz);
                     break;
                 case "X axis":
                 case "Y axis":
                 case "Z asix":
-                    f.ScaleAxis(sx, sy, sz);
+                    f.scale_axis(sx, sy, sz);
                     break;
                 default:
                     break;
@@ -121,13 +121,13 @@ namespace AffineTransformations
             switch (comboBox2.Text)
             {
                 case "Tetrahedron":
-                    scene.Add(Polygon.Tetrahedron(100));//тетраэдр
+                    scene.Add(Polygon.get_Tetrahedron(100));//тетраэдр
                     break;
                 case "Octahedron":
                     scene.Add(Polygon.Octahedron(100));//октаэдр
                     break;
                 case "Icosahedron":
-                    scene.Add(Polygon.Icosahedron(50));//икосаэдр
+                    scene.Add(Polygon.get_Icosahedron(50));//икосаэдр
                     break;
                 default:
                     break;
