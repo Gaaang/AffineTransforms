@@ -78,7 +78,7 @@ namespace AffineTransformations
                 for (int j = 0; j < w; j++)
                 {
                     zbuffer[i, j] = 0;
-                    cbuffer[i, j] = Color.LightSkyBlue;
+                    cbuffer[i, j] = Color.Black;
                 }
 
 
@@ -158,16 +158,11 @@ namespace AffineTransformations
                     rgbValues[ind + 2] = cbuffer[i, j].R; // R
                     rgbValues[ind + 3] = cbuffer[i, j].A; //A
                 }
-
-
             }
 
             System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);
             bmp.UnlockBits(bmpData);
-
-
             return bmp;
-
         }
 
         ///  Camera params setters and getters invoking recounting of matrixes 
@@ -598,37 +593,6 @@ namespace AffineTransformations
 
         }
 
-
-        public static Color[,] TextureToColors(string filepath)
-        {
-            Bitmap tex = new Bitmap(filepath);
-            Color[,] res = new Color[tex.Height, tex.Width];
-
-
-            Rectangle rect = new Rectangle(0, 0, tex.Width, tex.Height);
-            System.Drawing.Imaging.BitmapData bmpData =
-                tex.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite,
-                tex.PixelFormat);
-
-
-            IntPtr ptr = bmpData.Scan0;
-            int strd = Math.Abs(bmpData.Stride);
-            int bytes = strd * tex.Height;
-            byte[] rgbValues = new byte[bytes];
-            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
-            tex.UnlockBits(bmpData);
-
-            for (int i = 0; i < tex.Height; i++)
-            {
-                for (int j = 0; j < tex.Width; j++)
-                {
-                    int ind = strd * i + j * 4;
-
-                    res[i, j] = Color.FromArgb(rgbValues[ind + 3], rgbValues[ind + 2], rgbValues[ind + 1], rgbValues[ind]);
-                }
-            }
-            return res;
-        }
     }
 
     public class OrbitCamera : CameraView
