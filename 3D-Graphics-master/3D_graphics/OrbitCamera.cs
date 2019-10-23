@@ -137,8 +137,6 @@ namespace AffineTransformations
 
             }
 
-
-
             Bitmap bmp = new Bitmap(rend_obj.Width, rend_obj.Height);
             Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
             System.Drawing.Imaging.BitmapData bmpData =

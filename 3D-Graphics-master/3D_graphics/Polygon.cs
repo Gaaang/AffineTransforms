@@ -214,6 +214,7 @@ namespace AffineTransformations
                 s.penEdge = dw;
 
         }
+        //определяет цвет граней
         public void SetRandColor()
         {
             Random r = new Random();
@@ -390,68 +391,6 @@ namespace AffineTransformations
             return multiply_matrix(mt2, ortMatrix);
         }
 
-        ///
-        /// --------------------SAVE/LOAD METHODS------------------------------------------
-        ///
-
-        public static Polygon parse_figure(string filename)
-        {
-            Polygon res = new Polygon();
-            List<string> lines = System.IO.File.ReadLines(filename).ToList();
-            var st = lines[0].Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            if (st[0] == "rotation")
-                return parse_rotation(lines);
-            else
-            {
-                int count_points = Int32.Parse(st[0]);
-                Dictionary<string, int> pnts = new Dictionary<string, int>();
-
-                for (int i = 0; i < count_points; ++i)
-                {
-                    string[] str = lines[i + 1].Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-                    res.points.Add(new Point3D(float.Parse(str[1]), float.Parse(str[2]), float.Parse(str[3])));
-                    pnts.Add(str[0], i);
-                }
-
-                int count_sides = Int32.Parse(lines[count_points + 1]);
-                for (int i = count_points + 2; i < lines.Count(); ++i)
-                {
-                    Edge s = new Edge(res);
-                    List<string> str = lines[i].Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                    foreach (var id in str)
-                        s.points.Add(pnts[id]);
-                    res.sides.Add(s);
-                }
-
-                res.SetPen(new Pen(Color.Red));
-                return res;
-            }
-        }
-
-        public static Polygon parse_rotation(List<string> lines)
-        {
-
-            string[] cnt = lines[1].Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            int count_points = Int32.Parse(cnt[0]);
-            int count_divs = Int32.Parse(cnt[1]);
-
-            if (count_points < 1 || count_divs < 1)
-                return new Polygon();
-
-            List<Point3D> pnts = new List<Point3D>();
-            for (int i = 2; i < count_points + 2; ++i)
-            {
-                string[] s = lines[i].Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-                pnts.Add(new Point3D(float.Parse(s[1]), float.Parse(s[2]), float.Parse(s[3])));
-            }
-
-            string[] str = lines[count_points + 2].Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            Point3D axis1 = new Point3D(float.Parse(str[0]), float.Parse(str[1]), float.Parse(str[2]));
-            str = lines[count_points + 3].Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            Point3D axis2 = new Point3D(float.Parse(str[0]), float.Parse(str[1]), float.Parse(str[2]));
-
-            return get_Rotation(pnts, axis1, axis2, count_divs);
-        }
 
         ///
         /// ------------------------STATIC READY FIGURES-----------------------------
@@ -580,9 +519,6 @@ namespace AffineTransformations
                 res.sides.Add(s);
             }
 
-
-
-
             res.points.Add(new Point3D(0, 0, (float)Math.Sqrt(5) / 2)); // ind
             res.points.Add(new Point3D(0, 0, -(float)Math.Sqrt(5) / 2)); // ind+1
             for (int i = 0; i < ind; i += 2)
@@ -607,43 +543,6 @@ namespace AffineTransformations
             res.SetRandColor();
             return res;
         }
-
-        public static Polygon get_curve(float x0, float x1, float y0, float y1, int n_x, int n_y, Func<float, float, float> f)
-        {
-            float step_x = (x1 - x0) / n_x;
-            float step_y = (y1 - y0) / n_y;
-            Polygon res = new Polygon();
-
-            float x = x0;
-            float y = y0;
-
-            for (int i = 0; i <= n_x; ++i)
-            {
-                y = y0;
-                for (int j = 0; j <= n_y; ++j)
-                {
-                    res.points.Add(new Point3D(x, y, f(x, y)));
-                    y += step_y;
-                }
-                x += step_x;
-            }
-
-            for (int i = 0; i < res.points.Count; ++i)
-            {
-                if ((i + 1) % (n_y + 1) == 0)
-                    continue;
-                if (i / (n_y + 1) == n_x)
-                    break;
-
-                Edge s = new Edge(res);
-                s.points.AddRange(new int[] { i, i + 1, i + n_y + 2, i + n_y + 1 });
-                s.points.Reverse();
-                res.sides.Add(s);
-            }
-            res.SetRandColor();
-            return res;
-        }
-
 
         public static Polygon get_Rotation(List<Point3D> pnts, Point3D axis1, Point3D axis2, int divs)
         {
@@ -671,10 +570,7 @@ namespace AffineTransformations
                     res.sides.Add(s);
 
                 }
-
-
             }
-
             res.SetPen(new Pen(Color.Black));
             return res;
         }

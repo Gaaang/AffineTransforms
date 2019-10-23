@@ -26,7 +26,7 @@ namespace AffineTransformations
             pictureBox1.Image = bmp;
             comboBox2.SelectedIndex = 0;
             ControlType.SelectedIndex = 0;
-            texture = new Color[1, 1] { { Color.White } };
+            texture = new Color[1, 1] { { Color.Black } };
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -215,6 +215,7 @@ namespace AffineTransformations
             pictureBox1.Invalidate();
         }
 
+        //Reset camera
         private void CamReset_Click(object sender, EventArgs e)
         {
             OrbitCam.Reset();
